@@ -1,0 +1,16 @@
+version: '3'
+services:
+  quotes:
+    image: simple-microservice-example_quotes:latest
+  api:
+    image: simple-microservice-example_api:latest
+    environment:
+      - "QUOTES_API=http://quotes:5000"
+    depends_on:
+      - quotes
+    ports:
+      - "3333:3000"
+  frontend:
+    image: simple-microservice-example_frontend:latest
+    ports:
+      - "80:80"
