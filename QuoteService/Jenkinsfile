@@ -16,30 +16,6 @@ node {
   def gitBranch = 'main'
   def dockerImageName = "simple-microservice-example_quotes"
   def dockerTag = "latest"
-	properties([
-		disableConcurrentBuilds(),
-		buildDiscarder(logRotator(numToKeepStr: '10')),
-			string(
-				name: 'gitTag',
-				defaultValue: '',
-				description: 'Deploy with Git Tag'
-			),
-			string(
-				name: 'gitHash',
-				defaultValue: '',
-				description: 'Deploy with Git Hash'
-			),
-			booleanParam(
-				name: 'allowPushImage',
-				defaultValue: true,
-				description: 'Push Docker Image'
-			),
-      booleanParam(
-        name: 'allowDeploy',
-        defaultValue: true,
-        description: 'Deploy'
-      )
-    ])
 
   stage('Checkout') {
     //def gitBranch
