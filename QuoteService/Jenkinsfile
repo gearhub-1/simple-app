@@ -1,0 +1,100 @@
+#!groovy​
+
+/*
+ * Create Deployment Image (For Server Alpha)
+ * Repo: https://registry.hub.docker.com
+ * Image: eggdevops/horeca-eggpos-web
+ */
+
+node {
+
+  def appImage
+  def projectName = 'simple-service'
+
+  // For git pull source code
+  def gitUrl = "https://github.com/gearhub-1/simple-app.git"
+  def gitBranch = 'main'
+  def dockerImageName = "simple-microservice-example_quotes"
+  def dockerTag = "latest"
+	properties([
+		disableConcurrentBuilds(),
+		buildDiscarder(logRotator(numToKeepStr: '10')),
+			string(
+				name: 'gitTag',
+				defaultValue: '',
+				description: 'Deploy with Git Tag'
+			),
+			string(
+				name: 'gitHash',
+				defaultValue: '',
+				description: 'Deploy with Git Hash'
+			),
+			booleanParam(
+				name: 'allowPushImage',
+				defaultValue: true,
+				description: 'Push Docker Image'
+			),
+      booleanParam(
+        name: 'allowDeploy',
+        defaultValue: true,
+        description: 'Deploy'
+      )
+    ])
+
+  stage('Checkout') {
+    //def gitBranch
+    if (gitTag) {
+      gitBranch = "refs/tags/${gitTag}"
+    } else if (gitHash) {
+      gitBranch = "${gitHash}"
+    } else {
+      gitBranch = "*/master"
+    }
+
+    cleanWs()
+    checkout([
+      $class: 'GitSCM',
+      branches: [
+        [name: gitBranch]
+      ],
+      doGenerateSubmoduleConfigurations: false,
+      extensions: [
+        [
+          $class: 'CloneOption',
+          depth: 0,
+          honorRefspec: true,
+          noTags: false,
+          reference: '',
+          shallow: true
+        ]
+      ],
+      submoduleCfg: []
+    ])
+  }
+
+  stage('Build Image') {
+    if (gitTag) {
+      dockerTag = "${gitTag}"
+    } else if (gitHash) {
+      dockerTag = "${gitHash}"
+    }
+    // Build app image
+    appImage = docker.build("localhost:5000/${dockerImageName}:${dockerTag}", '-f app.dockerfile .')
+  }
+
+  stage('Push Image') {
+    if (params.allowPushImage) {
+      appImage.push(dockerTag)
+    }
+  }
+
+  stage('Deploy') {
+    if (params.allowDeploy) {
+      withCredentials([usernamePassword(credentialsId: dockerCredentailsId, passwordVariable: 'password', usernameVariable: 'username')]) {
+        sh "echo \"$password\" | docker login -u ${username} --password-stdin ${dockerRegistry}"
+      }
+
+      sh "docker service update  --force --image ${dockerImageName}:${dockerTag}) ${swarmServiceName}"
+  }
+}
+}
