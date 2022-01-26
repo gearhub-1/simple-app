@@ -17,37 +17,6 @@ node {
   def dockerImageName = "simple-microservice-example_quotes"
   def dockerTag = "latest"
 
-  stage('Checkout') {
-    //def gitBranch
-    if (gitTag) {
-      gitBranch = "refs/tags/${gitTag}"
-    } else if (gitHash) {
-      gitBranch = "${gitHash}"
-    } else {
-      gitBranch = "*/master"
-    }
-
-    cleanWs()
-    checkout([
-      $class: 'GitSCM',
-      branches: [
-        [name: gitBranch]
-      ],
-      doGenerateSubmoduleConfigurations: false,
-      extensions: [
-        [
-          $class: 'CloneOption',
-          depth: 0,
-          honorRefspec: true,
-          noTags: false,
-          reference: '',
-          shallow: true
-        ]
-      ],
-      submoduleCfg: []
-    ])
-  }
-
   stage('Build Image') {
     if (gitTag) {
       dockerTag = "${gitTag}"
