@@ -19,6 +19,8 @@ node {
   
   stage('Build Image') {
     // Build app image
+    sh "ls"
+    sh "pwd"
     appImage = docker.build("localhost:5000/${dockerImageName}:${dockerTag}", '-f app.dockerfile .')
   }
 
