@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 # Copy current directory into the created directory
 COPY . /usr/src/app
-
+COPY requirements.txt /usr/src/app/requirements.txt
 # Install all dependencies
 RUN python -mpip install -r requirements.txt
 
