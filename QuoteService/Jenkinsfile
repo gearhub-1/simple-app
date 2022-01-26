@@ -18,11 +18,6 @@ node {
   def dockerTag = "latest"
   
   stage('Build Image') {
-    if (gitTag) {
-      dockerTag = "${gitTag}"
-    } else if (gitHash) {
-      dockerTag = "${gitHash}"
-    }
     // Build app image
     appImage = docker.build("localhost:5000/${dockerImageName}:${dockerTag}", '-f app.dockerfile .')
   }
